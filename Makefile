@@ -1,7 +1,6 @@
 CXX = g++
 EXEC = main
 
-EXECDIR = ./exe/
 SOURCEDIR = ./src/
 BUILDDIR = ./build/
 TESTDIR = ./tests/
@@ -20,9 +19,11 @@ all : $(EXEC) $(TEST)
 $(EXEC) : $(OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
-$(BUILDDIR)%.o : $(SOURCEDIR)%.cpp
-	mkdir -p $(BUILDDIR)
+$(BUILDDIR)%.o : $(SOURCEDIR)%.cpp $(BUILDDIR)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+$(BUILDDIR) :
+	mkdir -p $(BUILDDIR)
 
 clean :
 	rm -rf $(OBJ) $(EXEC) build/

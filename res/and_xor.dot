@@ -11,5 +11,5 @@ O [label = "OUTPUT"];
 
 I1 -> MY_AND -> MY_XOR;
 I2 -> MY_AND;
-I3 -> MY_XOR-> O; 
+I3 -> MY_XOR -> O; 
 }
