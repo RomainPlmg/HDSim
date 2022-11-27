@@ -3,12 +3,10 @@
 
 int main() {
 
-	struct Node in1(1, {}, {1}), in2(1, {}, {1});
-	struct Node and2(2, {&in1, &in2}, {});
-	struct Node out(0, {&and2}, {});
-
-	computeOut(&and2);
-	computeOut(&out);
+	struct Input in1({1}), in2({1});
+	struct And and2({&in1, &in2});
+	struct Output out({&and2});
+	out.computeOut();
 	cout << "out = " << out.values.back() << "\n";
 
 	return 0;
