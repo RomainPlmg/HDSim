@@ -2,28 +2,30 @@ CXX = g++
 EXEC = main
 
 SOURCEDIR = ./src/
-BUILDDIR = ./build/
+OBJDIR = ./obj/
 TESTDIR = ./tests/
 
 SRC = $(wildcard $(SOURCEDIR)*.cpp)
-TEST = $(wildcard $(TESTDIR)*cpp)
 
-OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(BUILDDIR)%.o, $(SRC))
-OBJ += $(patsubst $(TESTDIR)%.cpp, $(BUILDDIR)%.o, $(TEST))
+OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(OBJDIR)%.o, $(SRC))
 
 CXXFLAGS = -I./include
 LDFLAGS = -Wall
 
-all : $(EXEC) $(TEST)
+all : $(EXEC)
 
 $(EXEC) : $(OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
-$(BUILDDIR)%.o : $(SOURCEDIR)%.cpp $(BUILDDIR)
+$(OBJDIR)%.o : $(SOURCEDIR)%.cpp $(OBJDIR)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-$(BUILDDIR) :
-	mkdir -p $(BUILDDIR)
+test_linked_list : $(TESTDIR)test_linked_list.cpp $(SOURCEDIR)lexer.cpp
+	$(CXX) $^ -o $@ $(CXXFLAGS)
+
+$(OBJDIR) :
+	mkdir -p $(OBJDIR)
 
 clean :
-	rm -rf $(OBJ) $(EXEC) build/
+	rm -rf $(EXEC) $(OBJDIR) test_linked_list
+	@echo $(TESTOBJ)
