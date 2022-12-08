@@ -3,7 +3,7 @@
 int main() {
 
 	/* FULL ADDER schematic */
-	struct Input in1("A", {0, 1, 0, 1, 0, 1, 0, 1}), in2("B", {0, 0, 1, 1, 0, 0, 1, 1}), cin("Cin", {0, 0, 0, 0, 1, 1, 1, 1});
+	struct Input in1("A", "01010101"), in2("B", "00110011"), cin("Cin", "00001111");
 	struct Xor xor2_1({&in1, &in2}), xor2_2({&xor2_1, &cin});
 	struct And and2_1({&in1, &in2}), and2_2({&xor2_1, &cin});
 	struct Or or2({&and2_1, &and2_2});

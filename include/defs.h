@@ -1,17 +1,18 @@
 #include <iostream>
 #include <string>
-#include <vector>
+#include "dynamic_bitset.h"
 
 using namespace std;
+using namespace sul;
 
 // Abstract structure for Node representation
 struct Node {
 protected:
 	vector<Node*> children; // Vector of Node* represents the input nodes
-	vector<bool> value; // Output vector of values
+	dynamic_bitset<> value; // Output vector of values
 public:
 	Node(vector<Node*> _children = {}) : children(_children) {}
-	Node(vector<bool> _value = {}) : value(_value) {}
+	Node(string _value) : value(_value) {}
 	
 	virtual bool computeOut(int i) = 0; // Virtual method to be overcharged in derived structures to compute output value
 
@@ -24,7 +25,7 @@ public:
 struct Signal : public Node {
 
 	Signal(string _name, vector<Node*> _children = {}) : name(_name), Node(_children) {}
-	Signal(string _name, vector<bool> _value = {}) : name(_name), Node(_value) {}
+	Signal(string _name, string _value) : name(_name), Node(_value) {}
 
 	virtual string getName() = 0;
 	virtual size_t getSize() = 0;
@@ -48,7 +49,7 @@ struct Output : public Signal {
 
 struct Input : public Signal {
 
-	Input(string _name, vector<bool> _value = {}) : Signal(_name, _value) {}
+	Input(string _name, string _value) : Signal(_name, _value) {}
 
 	bool computeOut(int i) {
 		return value[i];
@@ -64,7 +65,7 @@ struct And : public Node {
 
 	bool computeOut(int i) {
 		if(i >= value.size())
-			value.push_back(children.front()->computeOut(i) && children.back()->computeOut(i));
+			value.push_back(children.front()->computeOut(i) & children.back()->computeOut(i));
 		return value[i];
 	}
 };
@@ -75,7 +76,7 @@ struct Or : public Node {
 
 	bool computeOut(int i) {
 		if(i >= value.size())
-			value.push_back(children.front()->computeOut(i) || children.back()->computeOut(i));
+			value.push_back(children.front()->computeOut(i) | children.back()->computeOut(i));
 		return value[i];
 	}
 };
@@ -108,7 +109,7 @@ struct Nand : public Node {
 
 	bool computeOut(int i) {
 		if(i >= value.size())
-			value.push_back(~(children.front()->computeOut(i) && children.back()->computeOut(i)));
+			value.push_back(~(children.front()->computeOut(i) & children.back()->computeOut(i)));
 		return value[i];
 	}
 };
@@ -119,7 +120,7 @@ struct Nor : public Node {
 
 	bool computeOut(int i) {
 		if(i >= value.size())
-			value.push_back(~(children.front()->computeOut(i) || children.back()->computeOut(i)));
+			value.push_back(~(children.front()->computeOut(i) | children.back()->computeOut(i)));
 		return value[i];
 	}
 };
@@ -143,7 +144,7 @@ struct Mux : public Node {
 
 	bool computeOut(int i) {
 		if(i >= value.size())
-			value.push_back((children.at(0)->computeOut(i) && children.back()->computeOut(i)) || (children.at(1)->computeOut(i) && ~(children.back()->computeOut(i))));
+			value.push_back((children.at(0)->computeOut(i) & children.back()->computeOut(i)) | (children.at(1)->computeOut(i) & ~(children.back()->computeOut(i))));
 		return value[i];
 	}
 };

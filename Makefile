@@ -11,7 +11,7 @@ TEST = $(wildcard $(TESTDIR)*cpp)
 OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(BUILDDIR)%.o, $(SRC))
 OBJ += $(patsubst $(TESTDIR)%.cpp, $(BUILDDIR)%.o, $(TEST))
 
-CXXFLAGS = -I./include
+CXXFLAGS = -Iinclude -O3 -std=c++2a
 LDFLAGS = -Wall
 
 all : $(EXEC) $(TEST)
