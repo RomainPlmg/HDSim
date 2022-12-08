@@ -2,24 +2,27 @@ CXX = g++
 EXEC = main
 
 SOURCEDIR = ./src/
-OBJDIR = ./obj/
+BUILDDIR = ./build/
 TESTDIR = ./tests/
 
 SRC = $(wildcard $(SOURCEDIR)*.cpp)
+TEST = $(wildcard $(TESTDIR)*cpp)
 
-OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(OBJDIR)%.o, $(SRC))
+OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(BUILDDIR)%.o, $(SRC))
+OBJ += $(patsubst $(TESTDIR)%.cpp, $(BUILDDIR)%.o, $(TEST))
 
 CXXFLAGS = -I./include
 LDFLAGS = -Wall
 
-all : $(EXEC)
+all : $(EXEC) $(TEST)
 
 $(EXEC) : $(OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
-$(OBJDIR)%.o : $(SOURCEDIR)%.cpp $(OBJDIR)
+$(BUILDDIR)%.o : $(SOURCEDIR)%.cpp $(BUILDDIR)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
+<<<<<<< HEAD
 test_lexer : $(TESTDIR)test_lexer.cpp $(SOURCEDIR)lexer.cpp
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
