@@ -6,9 +6,12 @@
 #include <list>
 #include <string>
 
+#define WAVEDROM_DICT_SIZE 8
+#define DOT_DICT_SIZE 9
+
 using namespace std;
 
-int read_file(fstream& fp, list<string> &lexFile);
-string get_wavedrom_element(fstream& fp, int& it);
+int read_file(fstream &fp, string extension, list<string> &lexFile);
+string get_element(fstream &fp, string extension, int &it);
 
 #endif
