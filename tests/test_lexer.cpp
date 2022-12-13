@@ -4,14 +4,14 @@ void show_list(list<string> &li);
 
 int main(int argc, char const *argv[])
 {
-    string filePath = "./res/Inputs.json";
-    string extension = "json";
+    string filePath = "./res/and_xor.dot";
+    string extension = "dot";
     fstream fp (filePath);
 
     list<string> lexList;
 
     int err = read_file(fp, extension, lexList);
-    if (err == 0)
+    if (!err)
     {
         show_list(lexList);
     }

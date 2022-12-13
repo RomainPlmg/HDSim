@@ -26,7 +26,7 @@ int read_file(fstream &fp, string extension, list<string> &lexFile)
         else if (!group.empty())
         {
             if (group == " ") { horizontale_pos++; }
-            else if (group == "\n") { 
+            else if (group == "\n") {
                 vertical_pos++; 
                 horizontale_pos = 1;
             }
@@ -45,9 +45,9 @@ string get_element(fstream &fp, string extension, int &it)
     string word;
     char element = fp.peek();
 
-    if (element < 0) { return ""; }
+    if (element == '\r' || element == '\n') { return "\n"; }
     else if (element == ' ') { return " "; }
-    else if (element == '\n') { return "\n"; }
+    else if (element < 0) { return ""; }
     else if (isalpha(element) || isdigit(element) || element == '_')
     {
         while (isalpha(element) || isdigit(element) || element == '_')
