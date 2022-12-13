@@ -11,11 +11,10 @@ int main() {
 
 	vector<Node*> signals({&in1, &in2, &cin, &out, &c_out});
 
-	for(size_t i = 0; i < in1.getSize(); i++) {
-		out.computeOut(i);
-		c_out.computeOut(i);
-		cout << "out = " << out.getValue(i) << "  c_out = " << c_out.getValue(i) << endl;
-	}
+	out.computeOut();
+	c_out.computeOut();
+
+	cout << "out = " << out.getValue() << "  c_out = " << c_out.getValue() << endl;
 
 	create_file(signals);
 

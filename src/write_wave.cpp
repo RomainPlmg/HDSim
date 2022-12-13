@@ -2,17 +2,18 @@
 
 string BoolToString(Node* &N) {
 
+    string boolString = N->getValue();
     string output;
 
-    if(N->getValue(0) == 0)
+    if(boolString.front() == '0')
         output.push_back('0');
     else
         output.push_back('1');
 
-    for(size_t i = 1; i < N->getSize(); i++) {
-        if(N->getValue(i) == N->getValue(i-1))
+    for(size_t i = 1; i < boolString.size(); i++) {
+        if(boolString[i] == boolString[i-1])
             output.push_back('.');
-        else if(N->getValue(i) == 0)
+        else if(boolString[i] == '0')
             output.push_back('0');
         else
             output.push_back('1');
