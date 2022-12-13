@@ -1,6 +1,6 @@
 #include "write_wave.h"
 
-string BoolToString(Signal* &N) {
+string BoolToString(Node* &N) {
 
     string output;
 
@@ -21,7 +21,7 @@ string BoolToString(Signal* &N) {
     return output;
 }
 
-int create_file(vector<Signal*> &signals) {
+int create_file(vector<Node*> &signals) {
 
     ofstream fp("Results.json");
     if (!fp.is_open())

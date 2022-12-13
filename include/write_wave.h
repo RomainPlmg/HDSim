@@ -5,6 +5,6 @@
 
 using namespace std;
 
-string BoolToString(Signal* &N);
+string BoolToString(Node* &N);
 
-int create_file(vector<Signal*> &signals);
+int create_file(vector<Node*> &signals);

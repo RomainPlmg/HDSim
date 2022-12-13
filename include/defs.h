@@ -8,48 +8,36 @@ using namespace sul;
 // Abstract structure for Node representation
 struct Node {
 protected:
+	string name;
 	vector<Node*> children; // Vector of Node* represents the input nodes
 	dynamic_bitset<> value; // Output vector of values
 public:
-	Node(vector<Node*> _children = {}) : children(_children) {}
-	Node(string _value) : value(_value) {}
+	Node(string _name, vector<Node*> _children = {}) : name(_name), children(_children) {}
+	Node(string _name, string _value) : name(_name), value(_value) {}
 	
 	virtual bool computeOut(int i) = 0; // Virtual method to be overcharged in derived structures to compute output value
 
 	void addChild(Node* N) { children.push_back(N); }
-	bool getValue(int i) { return value[i]; } // Causes segfault if trying to access non initialized value
+	bool getValue(int i) { return value[i]; }
+	string getName() { return name; }
+	size_t getSize() { return value.size(); }
 };
 
 // Node is then derived to every sub-type which overcharge the computeOut method with corresponding logic formula
 
-struct Signal : public Node {
+struct Output : public Node {
 
-	Signal(string _name, vector<Node*> _children = {}) : name(_name), Node(_children) {}
-	Signal(string _name, string _value) : name(_name), Node(_value) {}
-
-	virtual string getName() = 0;
-	virtual size_t getSize() = 0;
-
-protected:
-	string name;
-};
-
-struct Output : public Signal {
-
-	Output(string _name, vector<Node*> _children = {}) : Signal(_name, _children) {}
+	Output(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		value.push_back(children.back()->computeOut(i));
 		return value[i];
 	}
-
-	string getName() { return name; }
-	size_t getSize() { return value.size(); }
 };
 
-struct Input : public Signal {
+struct Input : public Node {
 
-	Input(string _name, string _value) : Signal(_name, _value) {}
+	Input(string _name, string _value) : Node(_name, _value) {}
 
 	bool computeOut(int i) {
 		return value[i];
@@ -61,18 +49,22 @@ struct Input : public Signal {
 
 struct And : public Node {
 
-	And(vector<Node*> _children = {}) : Node(_children) {}
+	And(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
-		if(i >= value.size())
-			value.push_back(children.front()->computeOut(i) & children.back()->computeOut(i));
+		if(i >= value.size()) {
+			value.push_back(children[0]->computeOut(i));
+			for(size_t s = 1; s < children.size(); s++) {
+				value[i] &= children[s]->computeOut(i);
+			}
+		}
 		return value[i];
 	}
 };
 
 struct Or : public Node {
 
-	Or(vector<Node*> _children = {}) : Node(_children) {}
+	Or(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -83,7 +75,7 @@ struct Or : public Node {
 
 struct Xor : public Node {
 
-	Xor(vector<Node*> _children = {}) : Node(_children) {}
+	Xor(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -94,7 +86,7 @@ struct Xor : public Node {
 
 struct Not : public Node {
 
-	Not(vector<Node*> _children = {}) : Node(_children) {}
+	Not(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -105,7 +97,7 @@ struct Not : public Node {
 
 struct Nand : public Node {
 
-	Nand(vector<Node*> _children = {}) : Node(_children) {}
+	Nand(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -116,7 +108,7 @@ struct Nand : public Node {
 
 struct Nor : public Node {
 
-	Nor(vector<Node*> _children = {}) : Node(_children) {}
+	Nor(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -127,7 +119,7 @@ struct Nor : public Node {
 
 struct Xnor : public Node {
 
-	Xnor(vector<Node*> _children = {}) : Node(_children) {}
+	Xnor(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
@@ -140,7 +132,7 @@ struct Xnor : public Node {
 // Mux has strict in-order inputs : first and second are data, third is selection
 struct Mux : public Node {
 
-	Mux(vector<Node*> _children = {}) : Node(_children) {}
+	Mux(string _name, vector<Node*> _children = {}) : Node(_name, _children) {}
 
 	bool computeOut(int i) {
 		if(i >= value.size())
