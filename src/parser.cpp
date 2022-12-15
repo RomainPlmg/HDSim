@@ -86,7 +86,8 @@ int dot_parser(list<string> &dotFile)
     int offset = nodesName.size();
 
     // Check the header of the dot file
-    if(dot_header(it)) return dot_header(it);
+    int dotH = dot_header(it);
+    if(dotH) return dotH;
 
     while (it != dotFile.end())
     {
@@ -103,7 +104,6 @@ int dot_parser(list<string> &dotFile)
                     return 2;
                 }
                 string nodeName = *it;
-                nodesName.push_back(*it);
                 advance(it, 2);
                 if (*it != "label") return 1;
                 it++;
@@ -111,20 +111,15 @@ int dot_parser(list<string> &dotFile)
                 it++;
                 if (*it != "\"") return 1;
                 it++;
+                nodesName.push_back(nodeName);
 
                 // Store node's type into the list
                 switch (resolveStructure(*it))
                 {
                 case S_Input:
-                {
-                    vector<string>::iterator waveIn;
-                    int _waveIn = 0;
-                    for (waveIn = nodesName.begin(); waveIn < nodesName.begin() + offset; waveIn++)
-                    {
-                        if (nodesName[_waveIn] == *it) nodesName.erase(nodesName.begin() + _waveIn);
-                    }
+                    nodesName.erase(nodesName.begin());
+                    offset--;
                     break;
-                }
                 case S_Output:
                     v_node.push_back(new Output(nodesName.back()));
                     outputSignals.push_back(v_node.back());
@@ -158,7 +153,7 @@ int dot_parser(list<string> &dotFile)
                     break;
                 default:
                     cout << "ERROR: Unknown label \"" << *it << "\"" << endl;
-                    return 7;
+                    return 3;
                     break;
                 }
                 it++;
@@ -170,9 +165,16 @@ int dot_parser(list<string> &dotFile)
             }
             else if (*it == "->")
             {
+                if (offset != 0)
+                {
+                    nodesName.erase(nodesName.begin());
+                    offset--;
+                }
+                
                 int lc = linkChild(it);
                 if(lc) return lc;
             }
+            else return 2;
         }
         if (*it == "}") it++;
     }
@@ -284,11 +286,12 @@ int linkChild(list<string>::iterator &it)
     vector<string>::iterator n = find(nodesName.begin(), nodesName.end(), *it);
     if (n == nodesName.end()) // If the node has not been created before
     {
-        cout << "ERROR: Node \"" << *it << "\" has not been declared before" << endl;
+        cout << "ERROR: Node(s) \"" << *it << "\" was not declared before" << endl;
         return 3;
     }
     else // If the node has been created before
     {
+        // Check if the node is an input that it is not parent
         vector<Node*>::iterator p;
         int _p = 0;
         for (p = inputSignals.begin(); p != inputSignals.end(); p++)
@@ -298,14 +301,15 @@ int linkChild(list<string>::iterator &it)
                 cout << "ERROR: Input \"" << *it << "\" can't be parent of a node" << endl;
                 return 4;
             }
-            p++;
+            _p++;
         }
-        
+
         int nodePos = getIndex(nodesName, *it); // Get the relative index of the node
         // DEBUG
         // cout << "Node is: " << v_node[nodePos]->getName() << endl;
         advance(it, -2);
 
+        // Check if the node is an output that it is not child
         _p = 0;
         for (p = outputSignals.begin(); p != outputSignals.end(); p++)
         {
@@ -314,7 +318,7 @@ int linkChild(list<string>::iterator &it)
                 cout << "ERROR: Output \"" << *it << "\" can't be child of a node" << endl;
                 return 4;
             }
-            p++;
+            _p++;
         }
 
         int childPos = getIndex(nodesName, *it); // Get the relative index of the associated child
@@ -323,7 +327,7 @@ int linkChild(list<string>::iterator &it)
         // cout << "Child is: " << v_node[childPos]->getName() << endl;
         advance(it, 3);
         if (*it == ";") it++;
-        else it--;
+        else if (*it == "->") it--;
     }
     return 0;
 }
