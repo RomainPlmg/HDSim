@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include "dynamic_bitset.h"
 
 using namespace std;
@@ -11,6 +12,7 @@ protected:
 	string name;
 	vector<Node*> children; // Vector of Node* represents the input nodes
 	dynamic_bitset<> value; // Output vector of values
+	bool utilCycle(vector<Node*> &visited, vector<Node*> &recStack);
 public:
 	Node(string _name, vector<Node*> _children = {}) : name(_name), children(_children) {}
 	Node(string _name, string _value) : name(_name), value(_value) {}
@@ -21,6 +23,7 @@ public:
 	string getValue() { return value.to_string(); }
 	string getName() { return name; }
 	size_t getSize() { return value.size(); }
+	bool detectCycle();
 };
 
 // Node is then derived to every sub-type which overcharge the computeOut method with corresponding logic formula
@@ -156,6 +159,16 @@ struct Mux : public Node {
 		if(value.size() == 0) {
 			value = (children[0]->computeOut() & children.back()->computeOut()) | (children[1]->computeOut() & ~(children.back()->computeOut()));
 		}
+		return value;
+	}
+};
+
+struct FlipFlop : public Node {
+
+	FlipFlop(string _name, vector<Node*> _children ={}) : Node(_name, children) {}
+
+	dynamic_bitset<> computeOut() {
+		value = children.front()->computeOut() << 1;
 		return value;
 	}
 };
