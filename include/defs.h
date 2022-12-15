@@ -272,6 +272,7 @@ struct FlipFlop : public Node {
 
 	bool computeOut(int i) {
 		if(value.size() == (i+1)) {
+			value.push_back(0);
 			value[i+1] = children.front()->computeOut(i);
 		}
 		return value[i];
@@ -288,6 +289,7 @@ struct VirtualInput : public Node {
 	}
 
 	bool computeOut(int i) {
+		value.push_back(0);
 		value[i+1] = children.front()->getValue(i);
 		return value[i];
 	}
