@@ -5,6 +5,7 @@
         1 -> Syntax error
         2 -> Missing bracket
         3 -> Declaration
+        4 -> Circuit building
 */
 
 int wavedrom_parser(list<string> &waveFile)
@@ -73,12 +74,16 @@ int wavedrom_parser(list<string> &waveFile)
 
 int dot_parser(list<string> &dotFile)
 {
+    if (dotFile.empty())
+    {
+        cout << "ERROR: dot file is empty" << endl;
+        return 1;
+    }
+    
     bool isVariable;
     list<string>::iterator it = dotFile.begin();
+    vector<string> nodesNameBuffer;
     int offset = nodesName.size();
-
-    // DEBUG
-    int check = 0;
 
     // Check the header of the dot file
     if(dot_header(it)) return dot_header(it);
@@ -94,24 +99,32 @@ int dot_parser(list<string> &dotFile)
                 it--;
                 if (find(nodesName.begin() + offset, nodesName.end(), *it) != nodesName.end())
                 {
-                    cout << "ERROR: Multiple definition of node \"" << *it << "\"" << endl;
-                    return 1;
+                    cout << "ERROR: Multiple definitions of node \"" << *it << "\"" << endl;
+                    return 2;
                 }
+                string nodeName = *it;
                 nodesName.push_back(*it);
                 advance(it, 2);
-                if (*it != "label") return 4;
+                if (*it != "label") return 1;
                 it++;
-                if (*it != "=") return 5;
+                if (*it != "=") return 1;
                 it++;
-                if (*it != "\"") return 6;
+                if (*it != "\"") return 1;
                 it++;
 
                 // Store node's type into the list
                 switch (resolveStructure(*it))
                 {
                 case S_Input:
-                    nodesName.pop_back();
+                {
+                    vector<string>::iterator waveIn;
+                    int _waveIn = 0;
+                    for (waveIn = nodesName.begin(); waveIn < nodesName.begin() + offset; waveIn++)
+                    {
+                        if (nodesName[_waveIn] == *it) nodesName.erase(nodesName.begin() + _waveIn);
+                    }
                     break;
+                }
                 case S_Output:
                     v_node.push_back(new Output(nodesName.back()));
                     outputSignals.push_back(v_node.back());
@@ -157,10 +170,11 @@ int dot_parser(list<string> &dotFile)
             }
             else if (*it == "->")
             {
-                linkChild(it);
+                int lc = linkChild(it);
+                if(lc) return lc;
             }
-            if (*it == "}") it++;
         }
+        if (*it == "}") it++;
     }
     return 0;
 }
@@ -267,7 +281,7 @@ int linkChild(list<string>::iterator &it)
 {
     // it start at the symbol "->"
     it++; // it is now a node
-    auto n = find(nodesName.begin(), nodesName.end(), *it);
+    vector<string>::iterator n = find(nodesName.begin(), nodesName.end(), *it);
     if (n == nodesName.end()) // If the node has not been created before
     {
         cout << "ERROR: Node \"" << *it << "\" has not been declared before" << endl;
@@ -275,15 +289,38 @@ int linkChild(list<string>::iterator &it)
     }
     else // If the node has been created before
     {
+        vector<Node*>::iterator p;
+        int _p = 0;
+        for (p = inputSignals.begin(); p != inputSignals.end(); p++)
+        {
+            if(*it == inputSignals[_p]->getName())
+            {
+                cout << "ERROR: Input \"" << *it << "\" can't be parent of a node" << endl;
+                return 4;
+            }
+            p++;
+        }
+        
         int nodePos = getIndex(nodesName, *it); // Get the relative index of the node
         // DEBUG
-        cout << "Node is: " << v_node[nodePos]->getName() << endl;
+        // cout << "Node is: " << v_node[nodePos]->getName() << endl;
         advance(it, -2);
+
+        _p = 0;
+        for (p = outputSignals.begin(); p != outputSignals.end(); p++)
+        {
+            if(*it == outputSignals[_p]->getName())
+            {
+                cout << "ERROR: Output \"" << *it << "\" can't be child of a node" << endl;
+                return 4;
+            }
+            p++;
+        }
 
         int childPos = getIndex(nodesName, *it); // Get the relative index of the associated child
         v_node[nodePos]->addChild(v_node[childPos]); // Link the child to his parent
         // DEBUG
-        cout << "Child is: " << v_node[childPos]->getName() << endl;
+        // cout << "Child is: " << v_node[childPos]->getName() << endl;
         advance(it, 3);
         if (*it == ";") it++;
         else it--;
