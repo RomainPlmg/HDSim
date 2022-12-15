@@ -49,6 +49,7 @@ int main(int argc, char const *argv[])
         cout << "wavedrom parse error code: " << parseErr << endl;
         return 1;
     }
+
     parseErr = dot_parser(dotlexList);
     if (parseErr)
     {
