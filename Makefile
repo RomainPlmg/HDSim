@@ -30,7 +30,7 @@ test_parser : $(TESTDIR)test_parser.cpp $(SOURCEDIR)lexer.cpp $(SOURCEDIR)parser
 test_write : $(TESTDIR)test_write_result.cpp $(SOURCEDIR)write_wave.cpp
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
-test_simu : $(TESTDIR)test_simu.cpp $(SOURCEDIR)write_wave.cpp
+test_simu : $(TESTDIR)test_simu.cpp $(SOURCEDIR)write_wave.cpp $(SOURCEDIR)defs.cpp
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
 $(BUILDDIR) :

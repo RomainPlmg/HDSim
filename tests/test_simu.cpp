@@ -11,13 +11,25 @@ int main() {
 
 	vector<Node*> signals({&in1, &in2, &cin, &out, &c_out});
 
-	for(size_t i = 0; i < in1.getSize(); i++) {
-		out.computeOut(i);
-		c_out.computeOut(i);
-		cout << "out = " << out.getValue(i) << "  c_out = " << c_out.getValue(i) << endl;
-	}
+	out.computeOut();
+	c_out.computeOut();
+
+	cout << "out = " << out.getValue() << "  c_out = " << c_out.getValue() << endl;
 
 	create_file(signals);
+
+	if(out.detectCycle() || c_out.detectCycle())
+		cout << "Cycle detection error" << endl;
+
+	struct And A1("a1"), A2("a2"), A3("a3");
+	A1.addChild(&A2);
+	A2.addChild(&A3);
+	A3.addChild(&A1);
+
+	if(A3.detectCycle())
+		cout << "Cycle detected" << endl;
+	else
+		cout << " Error: cycle not detected" << endl;
 
 	return 0;
 }
