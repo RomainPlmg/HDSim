@@ -8,6 +8,8 @@
         4 -> Circuit building
 */
 
+vector<string> nodesLabel;
+
 int wavedrom_parser(list<string> &waveFile)
 {
     list<string>::iterator it = waveFile.begin();
@@ -36,6 +38,7 @@ int wavedrom_parser(list<string> &waveFile)
             }
             string signalName = *it;
             nodesName.push_back(signalName);
+            nodesLabel.push_back("INPUT");
             it++;
             if (*it != "\'") return 1;
             it++;
@@ -103,7 +106,7 @@ int dot_parser(list<string> &dotFile)
                     cout << "ERROR: Multiple definitions of node \"" << *it << "\"" << endl;
                     return 2;
                 }
-                string nodeName = *it;
+                nodesName.push_back(*it);
                 advance(it, 2);
                 if (*it != "label") return 1;
                 it++;
@@ -111,12 +114,13 @@ int dot_parser(list<string> &dotFile)
                 it++;
                 if (*it != "\"") return 1;
                 it++;
-                nodesName.push_back(nodeName);
+                nodesLabel.push_back(*it);
 
                 // Store node's type into the list
                 switch (resolveStructure(*it))
                 {
                 case S_Input:
+                    nodesLabel.erase(nodesLabel.begin());
                     nodesName.erase(nodesName.begin());
                     offset--;
                     break;
@@ -167,6 +171,7 @@ int dot_parser(list<string> &dotFile)
             {
                 if (offset != 0)
                 {
+                    nodesLabel.erase(nodesLabel.begin());
                     nodesName.erase(nodesName.begin());
                     offset--;
                 }
@@ -243,7 +248,7 @@ int signal_parser(string &name, string &signal) {
 }
 
 
-Structure resolveStructure(string str)
+Structure resolveStructure(string &str)
 {
     if (str == "OUTPUT")    return S_Output;
     if (str == "INPUT")     return S_Input;
@@ -254,6 +259,7 @@ Structure resolveStructure(string str)
     if (str == "NAND2")     return S_Nand;
     if (str == "NOR2")      return S_Nor;
     if (str == "XNOR2")     return S_Xnor;
+    if (str == "MUX2")      return S_Mux;
     if (str == "MUX")       return S_Mux;
     if (str == "FF")        return S_FF;
     else                    return MISSING;
@@ -291,38 +297,103 @@ int linkChild(list<string>::iterator &it)
     }
     else // If the node has been created before
     {
-        // Check if the node is an input that it is not parent
-        vector<Node*>::iterator p;
-        int _p = 0;
-        for (p = inputSignals.begin(); p != inputSignals.end(); p++)
-        {
-            if(*it == inputSignals[_p]->getName())
-            {
-                cout << "ERROR: Input \"" << *it << "\" can't be parent of a node" << endl;
-                return 4;
-            }
-            _p++;
-        }
-
         int nodePos = getIndex(nodesName, *it); // Get the relative index of the node
-        // DEBUG
-        // cout << "Node is: " << v_node[nodePos]->getName() << endl;
         advance(it, -2);
 
-        // Check if the node is an output that it is not child
-        _p = 0;
-        for (p = outputSignals.begin(); p != outputSignals.end(); p++)
+        int childPos = getIndex(nodesName, *it); // Get the relative index of the associated child
+        if (nodesLabel[childPos] == "OUTPUT")
         {
-            if(*it == outputSignals[_p]->getName())
-            {
-                cout << "ERROR: Output \"" << *it << "\" can't be child of a node" << endl;
-                return 4;
-            }
-            _p++;
+            cout << "ERROR: Output \"" << *it << "\" can't be child of a node" << endl;
+            return 4;
         }
 
-        int childPos = getIndex(nodesName, *it); // Get the relative index of the associated child
         v_node[nodePos]->addChild(v_node[childPos]); // Link the child to his parent
+        switch (resolveStructure(nodesLabel[nodePos]))
+        {
+        case S_Input:
+        {
+            if (v_node[nodePos]->getChildrenNb())
+            {
+                cout << "ERROR: Input \"" << v_node[nodePos]->getName() << "\" can't be parent of a node" << endl;
+                return 4;
+            }
+        }
+        case S_Output:
+            if (v_node[nodePos]->getChildrenNb() > 1)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_And:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Or:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Xor:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Not:
+            if (v_node[nodePos]->getChildrenNb() > 1)
+            {
+                cout << "ERROR: Too many drivers on BLA node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Nand:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Nor:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Xnor:
+            if (v_node[nodePos]->getChildrenNb() > 2)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_Mux:
+            if (v_node[nodePos]->getChildrenNb() > 3)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        case S_FF:
+            if (v_node[nodePos]->getChildrenNb() > 1)
+            {
+                cout << "ERROR: Too many drivers on node \"" << v_node[nodePos]->getName() << "\"" << endl;
+                return 4;
+            }
+            break;
+        default:
+            cout << "ERROR: Unknown label \"" << *it << "\"" << endl;
+            return 3;
+            break;
+        }
+
         // DEBUG
         // cout << "Child is: " << v_node[childPos]->getName() << endl;
         advance(it, 3);

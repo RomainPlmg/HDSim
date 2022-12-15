@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <list>
+#include <typeinfo>
 
 #include "vectors.h"
 
@@ -35,6 +36,6 @@ int wave_header(list<string>::iterator &it);
 int getIndex(vector<string> l, string str);
 int linkChild(list<string>::iterator &it);
 bool isItName(list<string>::iterator &it);
-Structure resolveStructure(string str);
+Structure resolveStructure(string &str);
 
 #endif
