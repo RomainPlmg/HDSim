@@ -1,35 +1,38 @@
 #include <algorithm>
 #include "defs.h"
 
-bool Node::detectCycle() {
+int Node::detectCycle(vector<vector<Node*>> &cycles) {
 
+    int flag = 0;
     vector<Node*> visited;
     vector<Node*> recStack;
+
     visited.push_back(this);
     recStack.push_back(this);
-    for(size_t i = 0; i < children.size(); i++) {
-        if(!(find(visited.begin(), visited.end(), children[i]) != visited.end()) && children[i]->utilCycle(visited, recStack))
-            return true;
-    }
 
-    return false;
+    for(size_t i = 0; i < children.size(); i++) {
+        if(!(find(visited.begin(), visited.end(), children[i]) != visited.end())) {
+            children[i]->recurCycle(flag, visited, recStack, cycles);
+        }
+    }
+    return flag;
 }
 
-bool Node::utilCycle(vector<Node*> &visited, vector<Node*> &recStack) {
+void Node::recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack, vector<vector<Node*>> &cycles) {
 
-    vector<Node*>::iterator it = find(visited.begin(), visited.end(), this);
-    if(it == visited.end()) {
+    visited.push_back(this);
+    recStack.push_back(this);
 
-        visited.push_back(this);
-        recStack.push_back(this);
-
-        for(size_t i = 0; i < children.size(); i++) {
-            if(!(find(visited.begin(), visited.end(), children[i]) != visited.end()) && children[i]->utilCycle(visited, recStack))
-                return true;
-            else if(find(recStack.begin(), recStack.end(), children[i]) != recStack.end())
-                return true;
+    for(size_t i = 0; i < children.size(); i++) {
+        if(!(find(visited.begin(), visited.end(), children[i]) != visited.end())) {
+            children[i]->recurCycle(flag, visited, recStack, cycles);
+        }
+        if(find(recStack.begin(), recStack.end(), children[i]) != recStack.end()) {
+            flag += 1;
+            cout << "hello" << endl;
+            cycles.push_back({this, children[i]});
         }
     }
     recStack.erase(find(recStack.begin(), recStack.end(), this));
-    return false;
 }
+

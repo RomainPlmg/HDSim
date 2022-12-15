@@ -12,7 +12,7 @@ protected:
 	string name;
 	vector<Node*> children; // Vector of Node* represents the input nodes
 	dynamic_bitset<> value; // Output vector of values
-	void recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack, vector<Node*> cycle[]);
+	void recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack, vector<vector<Node*>> &cycles);
 public:
 	Node(string _name, vector<Node*> _children = {}) : name(_name), children(_children) {}
 	Node(string _name, string _value) : name(_name), value(_value) {}
@@ -24,7 +24,7 @@ public:
 	string getName() { return name; }
 	size_t getSize() { return value.size(); }
 	size_t getChildrenNb() { return children.size(); }
-	int detectCycle(vector<Node*> cycle[]);
+	int detectCycle(vector<vector<Node*>> &cycles);
 };
 
 // Node is then derived to every sub-type which overcharge the computeOut method with corresponding logic formula
