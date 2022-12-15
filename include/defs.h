@@ -19,8 +19,10 @@ public:
 	
 	virtual dynamic_bitset<> computeOut() = 0; // Virtual method to be overcharged in derived structures to compute output value
 	virtual bool computeOut(int i) = 0;
-	void addChild(Node* N) { children.push_back(N); }
+	void addChild(Node* &N) { children.push_back(N); }
+	void suppChild(Node* &N) { children.erase(find(children.begin(), children.end(), N)); }
 	string getValue() { return value.to_string(); }
+	bool getValue(int i) { return value[i]; }
 	string getName() { return name; }
 	size_t getSize() { return value.size(); }
 	size_t getChildrenNb() { return children.size(); }
@@ -259,19 +261,34 @@ struct Mux : public Node {
 
 struct FlipFlop : public Node {
 
-	FlipFlop(string _name, vector<Node*> _children ={}) : Node(_name, children) {}
+	FlipFlop(string _name, vector<Node*> _children ={}) : Node(_name, "0") {}
 
 	dynamic_bitset<> computeOut() {
-		if(value.size() == 0) {
+		if(value.size() < 2) {
 			value = children.front()->computeOut() >> 1; // dynamic_bitset stores in little endian so we need to shift right for temporal shift
 		}
 		return value;
 	}
 
 	bool computeOut(int i) {
-		if(value.size() == i) {
-			value[i] = children.front()->computeOut(i) >> 1;
+		if(value.size() == (i+1)) {
+			value[i+1] = children.front()->computeOut(i);
 		}
+		return value[i];
+	}
+};
+
+struct VirtualInput : public Node {
+
+	VirtualInput(Node* &N) : Node("virtual", "0") { children.push_back(N); }
+
+	dynamic_bitset<> computeOut() {
+		cout << "Error:vector computation with loops" << endl;
+		exit(-1);
+	}
+
+	bool computeOut(int i) {
+		value[i+1] = children.front()->getValue(i);
 		return value[i];
 	}
 };

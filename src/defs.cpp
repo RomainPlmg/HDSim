@@ -29,8 +29,9 @@ void Node::recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack
         }
         if(find(recStack.begin(), recStack.end(), children[i]) != recStack.end()) {
             flag += 1;
-            cout << "hello" << endl;
-            cycles.push_back({this, children[i]});
+            vector<Node*> link = {this, children[i]};
+            if(search(cycles.begin(), cycles.end(), link.begin(), link.end()) != cycles.end())
+                cycles.push_back(link);
         }
     }
     recStack.erase(find(recStack.begin(), recStack.end(), this));
