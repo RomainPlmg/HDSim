@@ -15,14 +15,12 @@ int simulate()
     }
 
     vector<Node*>::iterator out;
-    for(int i = 0; i < bitStreamSize; i++) {
-        for (out = outputSignals.begin(); out != outputSignals.end(); out++)
-        {
-            (*out)->computeOut(i);
-            cout << (*out)->getName() << " = " << (*out)->getValue(i) << "\t";
-        }
-        cout << endl;
+    for (out = outputSignals.begin(); out != outputSignals.end(); out++)
+    {
+        (*out)->computeOut();
+        cout << (*out)->getName() << " = " << (*out)->getValue() << "\t";
     }
+    cout << endl;
 
     inputSignals.insert(inputSignals.end(), outputSignals.begin(), outputSignals.end());
     create_file(inputSignals);

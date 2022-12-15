@@ -6,5 +6,5 @@
 !/**/
 !*.*
 /.vscode
-./res/
+/res
 Results.json

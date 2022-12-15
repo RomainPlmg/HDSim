@@ -61,9 +61,9 @@ int wavedrom_parser(list<string> &waveFile)
         }
             if (*it != "}") return 2;
             it++;
-            if (*it == ",") it++;
-            else if (*it == "]") break;
-            else return 2;
+            while (*it == ",") it++;
+            if (*it == "]") break;
+            else if (*it != "{") return 2;
     }
     it++;
     if (*it != "}") return 2;
@@ -126,22 +126,22 @@ int dot_parser(list<string> &dotFile)
                     v_node.push_back(new Xor(nodesName.back()));
                     break;
                 case S_Not:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new Not(nodesName.back()));
                     break;
                 case S_Nand:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new Nand(nodesName.back()));
                     break;
                 case S_Nor:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new Nor(nodesName.back()));
                     break;
                 case S_Xnor:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new Xnor(nodesName.back()));
                     break;
                 case S_Mux:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new Mux(nodesName.back()));
                     break;
                 case S_FF:
-                    v_node.push_back(new Xor(nodesName.back()));
+                    v_node.push_back(new FlipFlop(nodesName.back()));
                     break;
                 default:
                     cout << "ERROR: Unknown label \"" << *it << "\"" << endl;
@@ -149,9 +149,9 @@ int dot_parser(list<string> &dotFile)
                     break;
                 }
                 it++;
-                if (*it != "\"") return 8;
+                if (*it != "\"") return 1;
                 it++;
-                if (*it != "]") return 9;
+                if (*it != "]") return 2;
                 it++;
                 if (*it == ";") it++;
             }
@@ -216,10 +216,7 @@ int signal_parser(string &name, string &signal) {
         }
         else if (signal[i] == '.') signal[i] = signal[i-1];
     }
-    
-    // Reverse signal string because dynamic_bitset is in little endian
-    int n = signal.length();
-    for (int i = 0; i < n / 2; i++) swap(signal[i], signal[n - i - 1]);
+
     if (find(nodesName.begin(), nodesName.end(), name) != nodesName.end())
     {
         v_node.push_back(new Input(name, signal));
@@ -280,12 +277,13 @@ int linkChild(list<string>::iterator &it)
     {
         int nodePos = getIndex(nodesName, *it); // Get the relative index of the node
         // DEBUG
-        // cout << "Node is: " << v_node[nodePos]->getName() << endl;
+        cout << "Node is: " << v_node[nodePos]->getName() << endl;
         advance(it, -2);
+
         int childPos = getIndex(nodesName, *it); // Get the relative index of the associated child
         v_node[nodePos]->addChild(v_node[childPos]); // Link the child to his parent
         // DEBUG
-        // cout << "Child is: " << v_node[childPos]->getName() << endl;
+        cout << "Child is: " << v_node[childPos]->getName() << endl;
         advance(it, 3);
         if (*it == ";") it++;
         else it--;

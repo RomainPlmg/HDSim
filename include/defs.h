@@ -168,7 +168,7 @@ struct FlipFlop : public Node {
 	FlipFlop(string _name, vector<Node*> _children ={}) : Node(_name, children) {}
 
 	dynamic_bitset<> computeOut() {
-		value = children.front()->computeOut() << 1;
+		value = children.front()->computeOut() >> 1;
 		return value;
 	}
 };
