@@ -4,8 +4,8 @@ void show_list(list<string> &li);
 
 int main(int argc, char const *argv[])
 {
-    string filePath = "./res/and_xor.dot";
-    string extension = "dot";
+    string filePath = "./res/Inputs.json";
+    string extension = "json";
     fstream fp (filePath);
 
     list<string> lexList;

@@ -5,27 +5,40 @@ void show_list(list<string> &li);
 
 int main(int argc, char const *argv[])
 {
-    string filePath = "./res/and_xor.dot";
-    string extension = "dot";
-    fstream fp (filePath);
+    string waveFilePath = "./res/Inputs.json";
+    string dotFilePath = "./res/and_xor.dot";
+    fstream waveFile (waveFilePath);
+    fstream dotFile (dotFilePath);
 
-    list<string> lexList;
+    list<string> wavelexList;
+    list<string> dotlexList;
 
     // Call lexer
-    int lexErr = read_file(fp, extension, lexList);
-    if (lexErr)
+    int wavelexErr = read_file(waveFile, "json", wavelexList);
+    if (wavelexErr)
     {
-        cout << "lex error code: " << lexErr << endl;
+        cout << "wave lex error code: " << wavelexErr << endl;
         return 1;
     }
-    show_list(lexList);
 
-    vector<string> nodesName;
+    int dotlexErr = read_file(dotFile, "dot", dotlexList);
+    if (dotlexErr)
+    {
+        cout << "dot lex error code: " << dotlexErr << endl;
+        return 1;
+    }
+
     // Call parser
-    int parseErr = dot_parser(lexList, nodesName);
+    int parseErr = wavedrom_parser(wavelexList);
     if (parseErr)
     {
-        cout << "parse error code: " << parseErr << endl;
+        cout << "wavedrom parse error code: " << parseErr << endl;
+        return 1;
+    }
+    parseErr = dot_parser(dotlexList);
+    if (parseErr)
+    {
+        cout << "dot parse error code: " << parseErr << endl;
         return 1;
     }
 }

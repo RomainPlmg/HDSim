@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include "defs.h"
+#include "vectors.h"
 
 using namespace std;
 

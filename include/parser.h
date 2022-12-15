@@ -4,10 +4,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 #include <list>
 
-#include "defs.h"
+#include "vectors.h"
 
 #define NODES_DICT_SIZE 10
 
@@ -24,13 +23,18 @@ enum Structure {
     S_Nor,
     S_Xnor,
     S_Mux,
+    S_FF,
     MISSING,
 };
 
 int wavedrom_parser(list<string> &waveFile);
-int signal_parser(list<string> &waveFile, vector<bool> &signal, vector<string> &nodesName);
-int dot_parser(list<string> &dotFile, vector<string> &nodesName);
-Structure resolveStructure(string input);
+int signal_parser(string &name, string &signal);
+int dot_parser(list<string> &dotFile);
+int dot_header(list<string>::iterator &it);
+int wave_header(list<string>::iterator &it);
 int getIndex(vector<string> l, string str);
+int linkChild(list<string>::iterator &it);
+bool isItName(list<string>::iterator &it);
+Structure resolveStructure(string str);
 
 #endif

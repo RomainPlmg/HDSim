@@ -7,7 +7,7 @@ int read_file(fstream &fp, string extension, list<string> &lexFile)
 {
     if (!fp.is_open())
     {
-        cout << "Error:File cannot be opened for reading";
+        cout << "Error:File cannot be opened for reading" << endl;
         return 1;
     }
 
@@ -48,9 +48,9 @@ string get_element(fstream &fp, string extension, int &it)
     if (element == '\r' || element == '\n') { return "\n"; }
     else if (element == ' ') { return " "; }
     else if (element < 0) { return ""; }
-    else if (isalpha(element) || isdigit(element) || element == '_')
+    else if (isalpha(element) || isdigit(element) || element == '_' || element == '.')
     {
-        while (isalpha(element) || isdigit(element) || element == '_')
+        while (isalpha(element) || isdigit(element) || element == '_' || element == '.')
         {
             word.push_back(element); // Convert char to string
 

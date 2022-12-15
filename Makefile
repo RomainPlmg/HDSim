@@ -1,5 +1,5 @@
 CXX = g++
-EXEC = main
+EXEC = HDSim
 
 SOURCEDIR = ./src/
 BUILDDIR = ./build/
@@ -9,12 +9,11 @@ SRC = $(wildcard $(SOURCEDIR)*.cpp)
 TEST = $(wildcard $(TESTDIR)*cpp)
 
 OBJ = $(patsubst $(SOURCEDIR)%.cpp, $(BUILDDIR)%.o, $(SRC))
-OBJ += $(patsubst $(TESTDIR)%.cpp, $(BUILDDIR)%.o, $(TEST))
 
 CXXFLAGS = -Iinclude -O3 -std=c++2a
 LDFLAGS = -Wall
 
-all : $(EXEC) $(TEST)
+all : $(EXEC)
 
 $(EXEC) : $(OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
@@ -34,8 +33,8 @@ test_write : $(TESTDIR)test_write_result.cpp $(SOURCEDIR)write_wave.cpp
 test_simu : $(TESTDIR)test_simu.cpp $(SOURCEDIR)write_wave.cpp
 	$(CXX) $^ -o $@ $(CXXFLAGS)
 
-$(OBJDIR) :
-	mkdir -p $(OBJDIR)
+$(BUILDDIR) :
+	mkdir -p $(BUILDDIR)
 
 clean :
-	rm -rf $(EXEC) $(OBJDIR) test_*
+	rm -rf $(EXEC) $(BUILDDIR) test_*
