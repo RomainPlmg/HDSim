@@ -157,7 +157,7 @@ struct Mux : public Node {
 
 	dynamic_bitset<> computeOut() {
 		if(value.size() == 0) {
-			value = (children[0]->computeOut() & children.back()->computeOut()) | (children[1]->computeOut() & ~(children.back()->computeOut()));
+			value = (children[1]->computeOut() & children[0]->computeOut()) | (children[2]->computeOut() & ~(children[0]->computeOut()));
 		}
 		return value;
 	}
