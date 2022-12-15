@@ -12,18 +12,19 @@ protected:
 	string name;
 	vector<Node*> children; // Vector of Node* represents the input nodes
 	dynamic_bitset<> value; // Output vector of values
-	bool utilCycle(vector<Node*> &visited, vector<Node*> &recStack);
+	void recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack, vector<Node*> cycle[]);
 public:
 	Node(string _name, vector<Node*> _children = {}) : name(_name), children(_children) {}
 	Node(string _name, string _value) : name(_name), value(_value) {}
 	
 	virtual dynamic_bitset<> computeOut() = 0; // Virtual method to be overcharged in derived structures to compute output value
-
+	virtual bool computeOut(int i) = 0;
 	void addChild(Node* N) { children.push_back(N); }
 	string getValue() { return value.to_string(); }
 	string getName() { return name; }
 	size_t getSize() { return value.size(); }
-	bool detectCycle();
+	size_t getChildrenNb() { return children.size(); }
+	int detectCycle(vector<Node*> cycle[]);
 };
 
 // Node is then derived to every sub-type which overcharge the computeOut method with corresponding logic formula
@@ -36,6 +37,11 @@ struct Output : public Node {
 		value = children.front()->computeOut();
 		return value;
 	}
+
+	bool computeOut(int i) {
+		value[i] = children.front()->computeOut(i);
+		return value[i];
+	}
 };
 
 struct Input : public Node {
@@ -44,6 +50,10 @@ struct Input : public Node {
 
 	dynamic_bitset<> computeOut() {
 		return value;
+	}
+
+	bool computeOut(int i) {
+		return value[i];
 	}
 };
 
@@ -60,6 +70,16 @@ struct And : public Node {
 		}
 		return value;
 	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] &= children[it]->computeOut(i);
+			}
+		}
+		return value[i];
+	}
 };
 
 struct Or : public Node {
@@ -74,6 +94,16 @@ struct Or : public Node {
 			}
 		}
 		return value;
+	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] |= children[it]->computeOut(i);
+			}
+		}
+		return value[i];
 	}
 };
 
@@ -90,6 +120,16 @@ struct Xor : public Node {
 		}
 		return value;
 	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] ^= children[it]->computeOut(i);
+			}
+		}
+		return value[i];
+	}
 };
 
 struct Not : public Node {
@@ -101,6 +141,16 @@ struct Not : public Node {
 			value = ~(children.front()->computeOut());
 		}
 		return value;
+	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] = ~(children[it]->computeOut(i));
+			}
+		}
+		return value[i];
 	}
 };
 
@@ -114,8 +164,20 @@ struct Nand : public Node {
 			for(size_t i = 1; i < children.size(); i++) {
 				value &= children[i]->computeOut();
 			}
+			value.flip();
 		}
-		return ~value;
+		return value;
+	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] &= children[it]->computeOut(i);
+			}
+			value.flip(i);
+		}
+		return value[i];
 	}
 };
 
@@ -132,6 +194,17 @@ struct Nor : public Node {
 		}
 		return ~value;
 	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] |= children[it]->computeOut(i);
+			}
+			value.flip(i);
+		}
+		return value[i];
+	}
 };
 
 struct Xnor : public Node {
@@ -147,6 +220,17 @@ struct Xnor : public Node {
 		}
 		return ~value;
 	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] ^= children[it]->computeOut(i);
+			}
+			value.flip(i);
+		}
+		return value[i];
+	}
 };
 
 
@@ -161,6 +245,16 @@ struct Mux : public Node {
 		}
 		return value;
 	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i);
+			for(size_t it = 1; it < children.size(); it++) {
+				value[i] = (children[1]->computeOut(i) & children[0]->computeOut(i)) | (children[2]->computeOut(i) & ~(children[0]->computeOut(i)));
+			}
+		}
+		return value[i];
+	}
 };
 
 struct FlipFlop : public Node {
@@ -168,7 +262,16 @@ struct FlipFlop : public Node {
 	FlipFlop(string _name, vector<Node*> _children ={}) : Node(_name, children) {}
 
 	dynamic_bitset<> computeOut() {
-		value = children.front()->computeOut() >> 1;
+		if(value.size() == 0) {
+			value = children.front()->computeOut() >> 1; // dynamic_bitset stores in little endian so we need to shift right for temporal shift
+		}
 		return value;
+	}
+
+	bool computeOut(int i) {
+		if(value.size() == i) {
+			value[i] = children.front()->computeOut(i) >> 1;
+		}
+		return value[i];
 	}
 };
