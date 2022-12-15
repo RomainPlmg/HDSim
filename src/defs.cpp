@@ -30,7 +30,7 @@ void Node::recurCycle(int &flag, vector<Node*> &visited, vector<Node*> &recStack
         if(find(recStack.begin(), recStack.end(), children[i]) != recStack.end()) {
             flag += 1;
             vector<Node*> link = {this, children[i]};
-            if(search(cycles.begin(), cycles.end(), link.begin(), link.end()) != cycles.end())
+            if(find(cycles.begin(), cycles.end(), link) == cycles.end())
                 cycles.push_back(link);
         }
     }
